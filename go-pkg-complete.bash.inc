@@ -8,7 +8,7 @@ get_go_pkgs() {
 }
 
 get_go_cmds() {
-    for i in clean env fix fmt generate get install list run test tool version vet save vendor; do
+    for i in build clean env fix fmt generate get install list run test tool version vet save vendor; do
         [[ $i == $1* ]] && echo $i
     done
 }
