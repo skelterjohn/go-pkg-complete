@@ -1,5 +1,5 @@
 get_go_pkgs() {
-	list_operand=$(dirname $1)
+	[[ $1 ]] && list_operand=$(dirname $1) || list_operand="."
 	if [[ "$list_operand" != "." ]]; then
 		go list "$list_operand/..." 2> /dev/null | grep "^$1"
 	else
@@ -7,19 +7,29 @@ get_go_pkgs() {
 	fi
 }
 
+get_go_cmds() {
+    for i in clean env fix fmt generate get install list run test tool version vet save vendor; do
+        [[ $i == $1* ]] && echo $i
+    done
+}
+
 go_pkg_complete() {
     set -- $COMP_LINE
     shift
 
-    cmd=$0
-
     while [[ $1 == -* ]]; do
           shift
     done
+    
+    local cur=${COMP_WORDS[COMP_CWORD]}
     if grep -q '^\(install\|build\|list\|get\|test\|generate\|vet\|save\|vendor\)$' <<< $1; then
-        local cur=${COMP_WORDS[COMP_CWORD]}
         COMPREPLY=( $(compgen -W "$(get_go_pkgs $cur)" -- $cur) )
+        return
     fi
+
+    [[ $2 ]] && return
+
+    COMPREPLY=( $(compgen -W "$(get_go_cmds $cur)" -- $cur) )
 }
 
 wgo_pkg_complete() {
