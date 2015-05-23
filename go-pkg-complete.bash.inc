@@ -4,10 +4,12 @@ get_go_pkgs_in() {(
     word="$2"
     for d in "$gopath"/src/"$word"*; do
         [[ "$d" == *"*" ]] && continue
+        [[ -d "$d" ]] || continue
         echo -n "${d/$gopath\/src\/} "
     done
     for d in "$gopath"/src/"$word"/*; do
         [[ "$d" == *"*" ]] && continue
+        [[ -d "$d" ]] || continue
         echo -n "${d/$gopath\/src\/}/ "
     done
 )}
@@ -18,7 +20,6 @@ get_go_pkgs_dup() {(
     for g in $GOPATH; do
         get_go_pkgs_in "$g" "$word"
     done
-    IFS=" "
 )}
 
 
