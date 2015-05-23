@@ -52,8 +52,7 @@ go_pkg_complete() {
 }
 
 wgo_pkg_complete() {
-    gopath=$(wgo env GOPATH) || go_pkg_complete $@
-    GOPATH=gopath go_pkg_complete $@
+    GOPATH=$(wgo env GOPATH) go_pkg_complete $@
 }
 
 complete -o nospace -F go_pkg_complete go
