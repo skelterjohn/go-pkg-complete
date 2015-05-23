@@ -1,10 +1,29 @@
+get_go_pkgs_in() {(
+    IFS=" "
+    gopath="$1"
+    word="$2"
+    for d in "$gopath"/src/"$word"*; do
+        [[ "$d" == *"*" ]] && continue
+        echo -n "${d/$gopath\/src\/} "
+    done
+    for d in "$gopath"/src/"$word"/*; do
+        [[ "$d" == *"*" ]] && continue
+        echo -n "${d/$gopath\/src\/}/ "
+    done
+)}
+
+get_go_pkgs_dup() {(
+    word=$1
+    IFS=":"
+    for g in $GOPATH; do
+        get_go_pkgs_in "$g" "$word"
+    done
+    IFS=" "
+)}
+
+
 get_go_pkgs() {
-	[[ $1 ]] && list_operand=$(dirname $1) || list_operand="."
-	if [[ "$list_operand" != "." ]]; then
-		go list "$list_operand/..." 2> /dev/null | grep "^$1"
-	else
-		go list "..." 2> /dev/null | grep "^$1"
-	fi
+    get_go_pkgs_dup $@ | sort | uniq
 }
 
 get_go_cmds() {
@@ -33,8 +52,9 @@ go_pkg_complete() {
 }
 
 wgo_pkg_complete() {
-    GOPATH=$(wgo env GOPATH) go_pkg_complete $@
+    gopath=$(wgo env GOPATH) || go_pkg_complete $@
+    GOPATH=gopath go_pkg_complete $@
 }
 
-complete -o default -F go_pkg_complete go
-complete -o default -F wgo_pkg_complete wgo
+complete -o nospace -F go_pkg_complete go
+complete -o nospace -F wgo_pkg_complete wgo
