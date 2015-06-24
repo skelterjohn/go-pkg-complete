@@ -2,17 +2,30 @@ get_go_pkgs_in() {(
     IFS=" "
     gopath="$1"
     word="$2"
-    for d in "$gopath"/src/"$word"*; do
-        [[ "$d" == *"*" ]] && continue
-        [[ -d "$d" ]] || continue
-        echo -n "${d/$gopath\/src\/} "
+    match="$word"
+    case "$word" in
+	"."|"./"*)
+	    match="$(go list -e .)${word:1}"
+	    ;;
+	".."|"../"*)
+	    match="$(go list -e ..)${word:2}"
+	    ;;
+    esac
+    for d in "$gopath"/src/"$match"*; do
+	[[ "$d" == *"*" ]] && continue
+	[[ -d "$d" ]] || continue
+	d="${d/$gopath\/src\/} "
+	d="$word${d:${#match}}"
+	echo -n "$d"
     done
-    if [ "${word: -1}" != "/" ]; then
-        for d in "$gopath"/src/"$word"/*; do
-           [[ "$d" == *"*" ]] && continue
-            [[ -d "$d" ]] || continue
-            echo -n "${d/$gopath\/src\/}/ "
-       done
+    if [ "${match: -1}" != "/" ]; then
+	for d in "$gopath"/src/"$match"/*; do
+	    [[ "$d" == *"*" ]] && continue
+	    [[ -d "$d" ]] || continue
+	    d="${d/$gopath\/src\/}/ "
+	    d="$word${d:${#match}}"
+	    echo -n "$d"
+	done
     fi
 )}
 
