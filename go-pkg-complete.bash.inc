@@ -62,6 +62,13 @@ go_pkg_complete() {
         return
     fi
 
+    case "$1" in
+        run)
+            COMPREPLY=( $(compgen -A file -G "$cur**/*.go" -- $cur) )
+            return
+	    ;;
+    esac
+
     [[ $2 ]] && return
 
     COMPREPLY=( $(compgen -W "$(get_go_cmds $cur)" -- $cur) )
