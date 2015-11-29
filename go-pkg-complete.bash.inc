@@ -4,28 +4,28 @@ get_go_pkgs_in() {(
     word="$2"
     match="$word"
     case "$word" in
-	"."|"./"*)
-	    match="$(go list -e .)${word:1}"
-	    ;;
-	".."|"../"*)
-	    match="$(go list -e ..)${word:2}"
-	    ;;
+        "."|"./"*)
+            match="$(go list -e .)${word:1}"
+            ;;
+        ".."|"../"*)
+            match="$(go list -e ..)${word:2}"
+            ;;
     esac
     for d in "$gopath"/src/"$match"*; do
-	[[ "$d" == *"*" ]] && continue
-	[[ -d "$d" ]] || continue
-	d="${d/$gopath\/src\/} "
-	d="$word${d:${#match}}"
-	echo -n "$d"
+        [[ "$d" == *"*" ]] && continue
+        [[ -d "$d" ]] || continue
+        d="${d/$gopath\/src\/} "
+        d="$word${d:${#match}}"
+        echo -n "$d"
     done
     if [ "${match: -1}" != "/" ]; then
-	for d in "$gopath"/src/"$match"/*; do
-	    [[ "$d" == *"*" ]] && continue
-	    [[ -d "$d" ]] || continue
-	    d="${d/$gopath\/src\/}/ "
-	    d="$word${d:${#match}}"
-	    echo -n "$d"
-	done
+        for d in "$gopath"/src/"$match"/*; do
+            [[ "$d" == *"*" ]] && continue
+            [[ -d "$d" ]] || continue
+            d="${d/$gopath\/src\/}/ "
+            d="$word${d:${#match}}"
+            echo -n "$d"
+        done
     fi
 )}
 
