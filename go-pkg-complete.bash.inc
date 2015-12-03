@@ -40,10 +40,14 @@ go_pkg_complete() {
     while [[ $1 == -* ]]; do
           shift
     done
-    
+
     local cur=${COMP_WORDS[COMP_CWORD]}
     if grep -q '^\(install\|build\|list\|get\|test\|generate\|vet\|save\|vendor\)$' <<< $1; then
         COMPREPLY=( $(compgen -W "$(get_go_pkgs $cur)" -- $cur) )
+        return
+    elif grep -q '^\(run\|fmt\)$' <<< $1; then
+        compopt -o default
+        COMPREPLY=()
         return
     fi
 
