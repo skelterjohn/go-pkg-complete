@@ -33,6 +33,12 @@ get_go_cmds() {
     done
 }
 
+get_go_tools() {
+    for i in $(go tool -n); do
+        [[ $i == $1* ]] && echo $i
+    done
+}
+
 go_pkg_complete() {
     set -- $COMP_LINE
     shift
@@ -44,6 +50,9 @@ go_pkg_complete() {
     local cur=${COMP_WORDS[COMP_CWORD]}
     if grep -q '^\(install\|build\|list\|get\|test\|generate\|vet\|save\|vendor\)$' <<< $1; then
         COMPREPLY=( $(compgen -W "$(get_go_pkgs $cur)" -- $cur) )
+        return
+    elif grep -q '^\(tool\)$' <<< $1; then
+        COMPREPLY=( $(compgen -W "$(get_go_tools $cur)" -- $cur) )
         return
     elif grep -q '^\(run\|fmt\)$' <<< $1; then
         compopt -o default
