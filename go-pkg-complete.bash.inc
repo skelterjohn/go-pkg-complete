@@ -2,16 +2,31 @@ get_go_pkgs_in() {(
     IFS=" "
     gopath="$1"
     word="$2"
-    for d in "$gopath"/src/"$word"*; do
-        [[ "$d" == *"*" ]] && continue
-        [[ -d "$d" ]] || continue
-        echo -n "${d/$gopath\/src\/} "
+    match="$word"
+    case "$word" in
+	"."|"./"*)
+	    match="$(go list -e .)${word:1}"
+	    ;;
+	".."|"../"*)
+	    match="$(go list -e ..)${word:2}"
+	    ;;
+    esac
+    for d in "$gopath"/src/"$match"*; do
+	[[ "$d" == *"*" ]] && continue
+	[[ -d "$d" ]] || continue
+	d="${d/$gopath\/src\/} "
+	d="$word${d:${#match}}"
+	echo -n "$d"
     done
-    for d in "$gopath"/src/"$word"/*; do
-        [[ "$d" == *"*" ]] && continue
-        [[ -d "$d" ]] || continue
-        echo -n "${d/$gopath\/src\/}/ "
-    done
+    if [ "${match: -1}" != "/" ]; then
+	for d in "$gopath"/src/"$match"/*; do
+	    [[ "$d" == *"*" ]] && continue
+	    [[ -d "$d" ]] || continue
+	    d="${d/$gopath\/src\/}/ "
+	    d="$word${d:${#match}}"
+	    echo -n "$d"
+	done
+    fi
 )}
 
 get_go_pkgs_dup() {(
@@ -33,6 +48,12 @@ get_go_cmds() {
     done
 }
 
+get_go_tools() {
+    for i in $(go tool -n); do
+        [[ $i == $1* ]] && echo $i
+    done
+}
+
 go_pkg_complete() {
     set -- $COMP_LINE
     shift
@@ -45,11 +66,21 @@ go_pkg_complete() {
     if grep -q '^\(install\|build\|list\|get\|test\|generate\|vet\|save\|vendor\)$' <<< $1; then
         COMPREPLY=( $(compgen -W "$(get_go_pkgs $cur)" -- $cur) )
         return
+    elif grep -q '^\(tool\)$' <<< $1; then
+        COMPREPLY=( $(compgen -W "$(get_go_tools $cur)" -- $cur) )
+        return
     elif grep -q '^\(run\|fmt\)$' <<< $1; then
         compopt -o default
         COMPREPLY=()
         return
     fi
+
+    case "$1" in
+        run)
+            COMPREPLY=( $(compgen -A file -G "$cur**/*.go" -- $cur) )
+            return
+	    ;;
+    esac
 
     [[ $2 ]] && return
 
